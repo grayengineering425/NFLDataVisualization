@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import pandas as pd
-
-
+from .offensivePlayerGame import OffensivePlayerGame
+    
 class GamesbotSpider(scrapy.Spider):
     name = 'gamesbot'
     start_url = 'http://www.footballdb.com'
@@ -14,13 +14,65 @@ class GamesbotSpider(scrapy.Spider):
             yield scrapy.Request(url=self.start_url+link, callback=self.parse)
         
     def parse(self, response):
-        teamStats      = response  .xpath('//div[contains(@id, "divBox_team")]')
+        #parsing box score from website
+        teamStats                = response        .xpath('//div[contains(@id, "divBox_team")]')
         
-        leftTable      = teamStats .xpath('.//div[@class = "section_left"]')
-        leftTableBody  = leftTable .xpath('.//tbody')
+        leftTable                = teamStats       .xpath('.//div[@class = "section_left"]')
+        leftTableBody            = leftTable       .xpath('.//tbody')
                 
-        rightTable     = teamStats .xpath('.//div[@class = "section_right"]')
-        rightTableBody = rightTable.xpath('.//tbody')
+        rightTable               = teamStats       .xpath('.//div[@class = "section_right"]')
+        rightTableBody           = rightTable      .xpath('.//tbody')
+        
+        #parsing tables for individual player statistics
+        playerStats              = response        .xpath('//div[@id = "divBox_stats"]')
+        
+        passerDiv                = playerStats     .xpath('.//div[@class = "table-responsive"][1]')
+        passerTable              = passerDiv       .xpath('.//table[@class = "statistics"]')
+        
+        rusherDiv                = playerStats     .xpath('.//div[@class = "table-responsive"][2]')
+        rusherTable              = rusherDiv       .xpath('.//table[@class = "statistics"]')
+
+        receiverDiv              = playerStats     .xpath('.//div[@class = "table-responsive"][3]')
+        receiverTable            = receiverDiv     .xpath('.//table[@class = "statistics"]')
+
+        kickoffReturnDiv         = playerStats     .xpath('.//div[@class = "table-responsive"][4]')
+        kickoffReturnTable       = kickoffReturnDiv.xpath('.//table[@class = "statistics"]')
+
+        puntReturnDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][5]')
+        puntReturnTable          = puntReturnDiv   .xpath('.//table[@class = "statistics"]')
+
+        kickingDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][7]')
+        kickingTable             = kickingDiv      .xpath('.//table[@class = "statistics"]')
+
+        defenseDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][9]')
+        defenseTable             = defenseDiv      .xpath('.//table[@class = "statistics"]')
+
+        fumblesDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][10]')
+        fumblesTable             = fumblesDiv      .xpath('.//table[@class = "statistics"]')
+
+        for passer in passerTable.xpath('.//tr'):
+            playerName = passer.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for rusher in rusherTable.xpath('.//tr'):
+            playerName = rusher.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for receiver in receiverTable.xpath('.//tr'):
+            playerName = receiver.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for kickoffReturner in kickoffReturnTable.xpath('.//tr'):
+            playerName = kickoffReturner.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for puntReturner in puntReturnTable.xpath('.//tr'):
+            playerName = puntReturner.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for kicker in kickingTable.xpath('.//tr'):
+            playerName = kicker.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for defender in defenseTable.xpath('.//tr'):
+            playerName = defender.xpath('.//td[1]/span/a/text()').extract_first()
+        
+        for fumbler in fumblesTable.xpath('.//tr'):
+            fumblerName = fumbler.xpath('.//td[1]/span/a/text()').extract_first()
         
         visitorFirstDowns        = leftTableBody.xpath('.//tr[1]/td[2]/text()')  .extract_first()
         visitorRushingFirstDowns = leftTableBody.xpath('.//tr[2]/td[2]/text()')  .extract_first()
@@ -132,6 +184,6 @@ class GamesbotSpider(scrapy.Spider):
             'home_avg_gain'                 : homeAvgGain,	       
             'home_time_of_possession'       : homeTimeOfPossession, 
         }
-
+        
         yield teamStats
 
