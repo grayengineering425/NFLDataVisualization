@@ -1,17 +1,26 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import pandas as pd
+import csv
 from .offensivePlayerGame import OffensivePlayerGame
+
+def getFileFromName(name):
+    firstLastName = name.split()
+    fileName = firstLastName[1] + '_' + firstLastName[0] + '.csv'
+    return fileName
+
     
 class GamesbotSpider(scrapy.Spider):
     name = 'gamesbot'
-    start_url = 'http://www.footballdb.com'
-    games = pd.read_csv('../NFLScraper/games.csv')
-    links = games['link']
+    #start_url = 'http://www.footballdb.com'
+    #games = pd.read_csv('../NFLScraper/games.csv')
+    #links = games['link']
+    start_urls = ['http://www.footballdb.com/games/boxscore.html?gid=2017092501']
+    players = {}
 
-    def start_requests(self):
-        for link in self.links:
-            yield scrapy.Request(url=self.start_url+link, callback=self.parse)
+    #def start_requests(self):
+    #    for link in self.links:
+    #        yield scrapy.Request(url=self.start_url+link, callback=self.parse)
         
     def parse(self, response):
         #parsing box score from website
@@ -51,10 +60,73 @@ class GamesbotSpider(scrapy.Spider):
         fumblesTable             = fumblesDiv      .xpath('.//table[@class = "statistics"]')
 
         for passer in passerTable.xpath('.//tr'):
-            playerName = passer.xpath('.//td[1]/span/a/text()').extract_first()
-        
+            playerName   = passer.xpath('.//td[1]/span/a/text()').extract_first()
+            passAttempts = passer.xpath('.//td[2]/text()')       .extract_first()
+            passComp     = passer.xpath('.//td[3]/text()')       .extract_first()
+            passYds      = passer.xpath('.//td[4]/text()')       .extract_first()
+            passAvg      = passer.xpath('.//td[5]/text()')       .extract_first()
+            passTD       = passer.xpath('.//td[6]/text()')       .extract_first()
+            passInt      = passer.xpath('.//td[7]/text()')       .extract_first()
+            passLg       = passer.xpath('.//td[8]/text()')       .extract_first()
+            sacks        = passer.xpath('.//td[9]/text()')       .extract_first()
+            loss         = passer.xpath('.//td[10]/text()')      .extract_first()
+            rate         = passer.xpath('.//td[11]/text()')      .extract_first()
+            #print(playerName)
+            if passAttempts != 'Att':
+                if playerName not in self.players.keys():
+                    self.players[playerName] = OffensivePlayerGame(playerName)
+                
+                    self.players[playerName].passAtt       = int(passAttempts)
+                    self.players[playerName].passCmp       = int(passComp)
+                    self.players[playerName].passYds       = int(passYds)
+                    self.players[playerName].passYPA       = float(passAvg)
+                    self.players[playerName].passTD        = int(passTD)
+                    self.players[playerName].interceptions = int(passInt)
+                    self.players[playerName].passLG        = int(passLg)
+                    self.players[playerName].sack          = int(sacks)
+                    self.players[playerName].loss          = int(loss)
+                    self.players[playerName].rate          = float(rate)
+                else:
+                    self.players[playerName].passAtt       = int(passAttempts)
+                    self.players[playerName].passCmp       = int(passComp)
+                    self.players[playerName].passYds       = int(passYds)
+                    self.players[playerName].passYPA       = float(passAvg)
+                    self.players[playerName].passTD        = int(passTD)
+                    self.players[playerName].interceptions = int(passInt)
+                    self.players[playerName].passLG        = int(passLg)
+                    self.players[playerName].sack          = int(sacks)
+                    self.players[playerName].loss          = int(loss)
+                    self.players[playerName].rate          = float(rate)
+                    #self.players[playerName].printOffensivePlayerGame()
+                    
         for rusher in rusherTable.xpath('.//tr'):
-            playerName = rusher.xpath('.//td[1]/span/a/text()').extract_first()
+            playerName   = rusher.xpath('.//td[1]/span/a/text()').extract_first()
+            rushAtt      = rusher.xpath('.//td[2]/text()')       .extract_first()
+            rushYds      = rusher.xpath('.//td[3]/text()')       .extract_first()
+            rushAvg      = rusher.xpath('.//td[4]/text()')       .extract_first()
+            rushLg       = rusher.xpath('.//td[5]/text()')       .extract_first()
+            rushTD       = rusher.xpath('.//td[6]/text()')       .extract_first()
+            rushFD       = rusher.xpath('.//td[7]/text()')       .extract_first()
+            #print(playerName)
+            if rushAtt != 'Att':
+                if playerName not in self.players.keys():
+                    self.players[playerName] = OffensivePlayerGame(playerName)
+                    
+                    self.players[playerName].rushAtt        = rushAtt
+                    self.players[playerName].rushYds        = rushYds
+                    self.players[playerName].rushAvg        = rushYds
+                    self.players[playerName].rushLg         = rushYds
+                    self.players[playerName].rushTD         = rushYds
+                    self.players[playerName].rushFirstDowns = rushFD
+                    
+                else:
+                    self.players[playerName].rushAtt        = rushAtt
+                    self.players[playerName].rushYds        = rushYds
+                    self.players[playerName].rushAvg        = rushYds
+                    self.players[playerName].rushLg         = rushYds
+                    self.players[playerName].rushTD         = rushYds
+                    self.players[playerName].rushFirstDowns = rushFD
+                    
         
         for receiver in receiverTable.xpath('.//tr'):
             playerName = receiver.xpath('.//td[1]/span/a/text()').extract_first()
@@ -68,8 +140,8 @@ class GamesbotSpider(scrapy.Spider):
         for kicker in kickingTable.xpath('.//tr'):
             playerName = kicker.xpath('.//td[1]/span/a/text()').extract_first()
         
-        for defender in defenseTable.xpath('.//tr'):
-            playerName = defender.xpath('.//td[1]/span/a/text()').extract_first()
+        #for defender in defenseTable.xpath('.//tr'):
+         #   playerName = defender.xpath('.//td[1]/span/a/text()').extract_first()
         
         for fumbler in fumblesTable.xpath('.//tr'):
             fumblerName = fumbler.xpath('.//td[1]/span/a/text()').extract_first()
@@ -184,6 +256,59 @@ class GamesbotSpider(scrapy.Spider):
             'home_avg_gain'                 : homeAvgGain,	       
             'home_time_of_possession'       : homeTimeOfPossession, 
         }
+
+        for key in self.players:
+            fileName = getFileFromName(key)
+            print(self.players[key].printOffensivePlayerGame())
+            playerFolder = '../NFLPlayerScraper/players/'
+            playerFile = open(playerFolder+fileName, 'a')
+            if (playerFile):
+               writer = csv.writer(playerFile)
+               writer.writerow([self.players[key].passAtt            ,
+				    self.players[key].passCmp        ,
+				    self.players[key].passYds        ,
+				    self.players[key].passYPA        ,
+				    self.players[key].passTD         ,
+				    self.players[key].interceptions  ,
+				    self.players[key].passLG         ,
+				    self.players[key].sack           ,
+				    self.players[key].loss           ,
+				    self.players[key].rate           ,
+				    self.players[key].rushAtt        ,
+				    self.players[key].rushYds        ,
+				    self.players[key].rushAvg        ,
+				    self.players[key].rushLg         ,
+				    self.players[key].rushTD         ,
+				    self.players[key].rushFirstDowns ,
+				    self.players[key].rec            ,
+				    self.players[key].recYds         ,
+				    self.players[key].recAvg         ,
+				    self.players[key].recLg          ,
+				    self.players[key].recTD          ,
+				    self.players[key].recFirstDowns  ,
+				    self.players[key].YAC            ,
+				    self.players[key].numPuntReturns ,
+				    self.players[key].puntReturnYds  ,
+				    self.players[key].avgPuntReturn  ,
+				    self.players[key].puntFC         ,
+				    self.players[key].puntLg         ,
+				    self.players[key].puntTD         ,
+				    self.players[key].kickReturns    ,
+				    self.players[key].kickReturnYds  ,
+				    self.players[key].kickreturnAvg  ,
+				    self.players[key].kickFC         ,
+				    self.players[key].kickLG         ,
+				    self.players[key].kickTD         ,
+				    self.players[key].fum            ,
+				    self.players[key].lost           ,
+				    self.players[key].forced         ,
+				    self.players[key].own            ,
+				    self.players[key].opp            ,
+				    self.players[key].tot            ,
+				    self.players[key].yds            ,
+				    self.players[key].fumTD
+                                ])
+            playerFile.close()
         
         yield teamStats
 

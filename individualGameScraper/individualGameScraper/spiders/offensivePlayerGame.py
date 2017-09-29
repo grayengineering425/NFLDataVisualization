@@ -45,9 +45,9 @@ class OffensivePlayerGame:
         self.yds            = 0
         self.fumTD          = 0
 
-        def printOffensivePlayerGame():
-            print(self.name,
-                  self.passAtt,         ", ",
+    def printOffensivePlayerGame(self):
+        print(self.name,                ", ",
+              self.passAtt,             ", ",
                   self.passCmp,         ", ",
                   self.passYds,         ", ",
                   self.passYPA,         ", ",
