@@ -2,23 +2,23 @@ import scrapy
 
 class NFLSpider(scrapy.Spider):
     name = "NFLGameSpider"
-    start_urls = ['http://www.footballdb.com/games/index.html']
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2016',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2015',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2014',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2013',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2012',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2011',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2010',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2009',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2008',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2007',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2006',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2005',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2004',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2003',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2002',
-                  #'http://www.footballdb.com/games/index.html?lg=NFL&yr=2001']
+    start_urls = ['http://www.footballdb.com/games/index.html',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2016',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2015',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2014',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2013',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2012',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2011',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2010',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2009',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2008',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2007',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2006',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2005',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2004',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2003',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2002',
+                  'http://www.footballdb.com/games/index.html?lg=NFL&yr=2001']
 
     def start_request(self):
         for start in start_urls:   

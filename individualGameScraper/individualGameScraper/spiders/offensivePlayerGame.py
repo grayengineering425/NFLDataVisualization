@@ -1,40 +1,41 @@
 class OffensivePlayerGame:
-    def __init__(self, name):
+    def __init__(self, name, opponent):
         self.name           = name
+        self.opponent       = opponent
         self.passAtt        = 0
         self.passCmp        = 0
         self.passYds        = 0
         self.passYPA        = 0.0
         self.passTD         = 0
         self.interceptions  = 0
-        self.passLG         = 0
+        self.passLG         = ""
         self.sack           = 0
         self.loss           = 0
         self.rate           = 0.0
         self.rushAtt        = 0
         self.rushYds        = 0
         self.rushAvg        = 0.0
-        self.rushLg         = 0
+        self.rushLg         = ""
         self.rushTD         = 0
         self.rushFirstDowns = 0
         self.rec            = 0
         self.recYds         = 0
         self.recAvg         = 0.0
-        self.recLg          = 0
+        self.recLg          = ""
         self.recTD          = 0
         self.recFirstDowns  = 0
         self.YAC            = 0.0
-        self.numPuntReturns = 0
+        self.puntReturns    = 0
         self.puntReturnYds  = 0
-        self.avgPuntReturn  = 0.0
+        self.puntReturnAvg  = 0.0
         self.puntFC         = 0
-        self.puntLg         = 0
+        self.puntLG         = ""
         self.puntTD         = 0
         self.kickReturns    = 0
         self.kickReturnYds  = 0
-        self.kickreturnAvg  = 0
+        self.kickReturnAvg  = 0
         self.kickFC         = 0
-        self.kickLG         = 0
+        self.kickLG         = ""
         self.kickTD         = 0
         self.fum            = 0
         self.lost           = 0
@@ -47,7 +48,8 @@ class OffensivePlayerGame:
 
     def printOffensivePlayerGame(self):
         print(self.name,                ", ",
-              self.passAtt,             ", ",
+		  self.opponent,        ", ",
+                  self.passAtt,         ", ",
                   self.passCmp,         ", ",
                   self.passYds,         ", ",
                   self.passYPA,         ", ",
@@ -70,15 +72,15 @@ class OffensivePlayerGame:
                   self.recTD,           ", ",
                   self.recFirstDowns,   ", ",
                   self.YAC,             ", ",
-                  self.numPuntReturns,  ", ",
+                  self.puntReturns,     ", ",
                   self.puntReturnYds,   ", ",
-                  self.avgPuntReturn,   ", ",
+                  self.puntReturnAvg,   ", ",
                   self.puntFC,          ", ",
-                  self.puntLg,          ", ",
+                  self.puntLG,          ", ",
                   self.puntTD,          ", ",
                   self.kickReturns,     ", ",
                   self.kickReturnYds,   ", ",
-                  self.kickreturnAvg,   ", ",
+                  self.kickReturnAvg,   ", ",
                   self.kickFC,          ", ",
                   self.kickLG,          ", ",
                   self.kickTD,          ", ",

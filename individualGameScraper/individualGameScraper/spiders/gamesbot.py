@@ -12,17 +12,21 @@ def getFileFromName(name):
     
 class GamesbotSpider(scrapy.Spider):
     name = 'gamesbot'
-    #start_url = 'http://www.footballdb.com'
-    #games = pd.read_csv('../NFLScraper/games.csv')
-    #links = games['link']
-    start_urls = ['http://www.footballdb.com/games/boxscore.html?gid=2017092501']
+    start_url = 'http://www.footballdb.com'
+    games = pd.read_csv('../NFLScraper/games.csv')
+    links = games['link']
+    date = ''
+    home = ''
+    visitor = ''
     players = {}
 
-    #def start_requests(self):
-    #    for link in self.links:
-    #        yield scrapy.Request(url=self.start_url+link, callback=self.parse)
-        
+    def start_requests(self):
+        for link in self.links:
+            yield scrapy.Request(url=self.start_url+link, callback=self.parse)
+            
     def parse(self, response):
+        self.players.clear()
+
         #parsing box score from website
         teamStats                = response        .xpath('//div[contains(@id, "divBox_team")]')
         
@@ -59,7 +63,14 @@ class GamesbotSpider(scrapy.Spider):
         fumblesDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][10]')
         fumblesTable             = fumblesDiv      .xpath('.//table[@class = "statistics"]')
 
-        for passer in passerTable.xpath('.//tr'):
+        currentDate              = response        .xpath('//div[@id = "leftcol"]/center/div/text()').extract_first()
+        currentVisitor           = response        .xpath('//button[@id = "btnBox_visitor"]/text()') .extract_first()
+        currentHome              = response        .xpath('//button[@id = "btnBox_home"]/text()')    .extract_first()
+        
+
+        visitor = True
+        count = 0
+        for passer in passerTable.xpath('.//tr'):            
             playerName   = passer.xpath('.//td[1]/span/a/text()').extract_first()
             passAttempts = passer.xpath('.//td[2]/text()')       .extract_first()
             passComp     = passer.xpath('.//td[3]/text()')       .extract_first()
@@ -71,34 +82,32 @@ class GamesbotSpider(scrapy.Spider):
             sacks        = passer.xpath('.//td[9]/text()')       .extract_first()
             loss         = passer.xpath('.//td[10]/text()')      .extract_first()
             rate         = passer.xpath('.//td[11]/text()')      .extract_first()
-            #print(playerName)
+
             if passAttempts != 'Att':
                 if playerName not in self.players.keys():
-                    self.players[playerName] = OffensivePlayerGame(playerName)
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
                 
-                    self.players[playerName].passAtt       = int(passAttempts)
-                    self.players[playerName].passCmp       = int(passComp)
-                    self.players[playerName].passYds       = int(passYds)
-                    self.players[playerName].passYPA       = float(passAvg)
-                    self.players[playerName].passTD        = int(passTD)
-                    self.players[playerName].interceptions = int(passInt)
-                    self.players[playerName].passLG        = int(passLg)
-                    self.players[playerName].sack          = int(sacks)
-                    self.players[playerName].loss          = int(loss)
-                    self.players[playerName].rate          = float(rate)
-                else:
-                    self.players[playerName].passAtt       = int(passAttempts)
-                    self.players[playerName].passCmp       = int(passComp)
-                    self.players[playerName].passYds       = int(passYds)
-                    self.players[playerName].passYPA       = float(passAvg)
-                    self.players[playerName].passTD        = int(passTD)
-                    self.players[playerName].interceptions = int(passInt)
-                    self.players[playerName].passLG        = int(passLg)
-                    self.players[playerName].sack          = int(sacks)
-                    self.players[playerName].loss          = int(loss)
-                    self.players[playerName].rate          = float(rate)
-                    #self.players[playerName].printOffensivePlayerGame()
-                    
+                self.players[playerName].passAtt       = int(passAttempts)
+                self.players[playerName].passCmp       = int(passComp)
+                self.players[playerName].passYds       = int(passYds)
+                self.players[playerName].passYPA       = float(passAvg)
+                self.players[playerName].passTD        = int(passTD)
+                self.players[playerName].interceptions = int(passInt)
+                self.players[playerName].passLG        = passLg
+                self.players[playerName].sack          = int(sacks)
+                self.players[playerName].loss          = int(loss)
+                self.players[playerName].rate          = float(rate)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
+
+        visitor = True
+        count = 0
         for rusher in rusherTable.xpath('.//tr'):
             playerName   = rusher.xpath('.//td[1]/span/a/text()').extract_first()
             rushAtt      = rusher.xpath('.//td[2]/text()')       .extract_first()
@@ -107,44 +116,155 @@ class GamesbotSpider(scrapy.Spider):
             rushLg       = rusher.xpath('.//td[5]/text()')       .extract_first()
             rushTD       = rusher.xpath('.//td[6]/text()')       .extract_first()
             rushFD       = rusher.xpath('.//td[7]/text()')       .extract_first()
-            #print(playerName)
+
             if rushAtt != 'Att':
                 if playerName not in self.players.keys():
-                    self.players[playerName] = OffensivePlayerGame(playerName)
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
                     
-                    self.players[playerName].rushAtt        = rushAtt
-                    self.players[playerName].rushYds        = rushYds
-                    self.players[playerName].rushAvg        = rushYds
-                    self.players[playerName].rushLg         = rushYds
-                    self.players[playerName].rushTD         = rushYds
-                    self.players[playerName].rushFirstDowns = rushFD
-                    
-                else:
-                    self.players[playerName].rushAtt        = rushAtt
-                    self.players[playerName].rushYds        = rushYds
-                    self.players[playerName].rushAvg        = rushYds
-                    self.players[playerName].rushLg         = rushYds
-                    self.players[playerName].rushTD         = rushYds
-                    self.players[playerName].rushFirstDowns = rushFD
-                    
-        
+                self.players[playerName].rushAtt        = int(rushAtt)
+                self.players[playerName].rushYds        = rushYds
+                self.players[playerName].rushAvg        = float(rushAvg)
+                self.players[playerName].rushLg         = rushLg
+                self.players[playerName].rushTD         = int(rushTD)
+                self.players[playerName].rushFirstDowns = int(rushFD)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
+
+        visitor = True
+        count = 0
         for receiver in receiverTable.xpath('.//tr'):
             playerName = receiver.xpath('.//td[1]/span/a/text()').extract_first()
-        
+            rec        = receiver.xpath('.//td[2]/text()')       .extract_first()
+            yds        = receiver.xpath('.//td[3]/text()')       .extract_first()
+            avg        = receiver.xpath('.//td[4]/text()')       .extract_first()
+            lg         = receiver.xpath('.//td[5]/text()')       .extract_first()
+            td         = receiver.xpath('.//td[6]/text()')       .extract_first()
+            fd         = receiver.xpath('.//td[7]/text()')       .extract_first()
+
+            if rec != 'Rec':
+                if playerName not in self.players.keys():
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
+
+                self.players[playerName].rec           = int(rec)
+                self.players[playerName].recYds        = int(yds)
+                self.players[playerName].recAvg        = float(avg)
+                self.players[playerName].recLg         = lg
+                self.players[playerName].recTD         = int(td)
+                self.players[playerName].recFirstDowns = int(fd)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
+
+        visitor = True
+        count = 0
         for kickoffReturner in kickoffReturnTable.xpath('.//tr'):
             playerName = kickoffReturner.xpath('.//td[1]/span/a/text()').extract_first()
-        
+            num        = kickoffReturner.xpath('.//td[2]/text()')       .extract_first()
+            yds        = kickoffReturner.xpath('.//td[3]/text()')       .extract_first()
+            avg        = kickoffReturner.xpath('.//td[4]/text()')       .extract_first()
+            fc         = kickoffReturner.xpath('.//td[5]/text()')       .extract_first()
+            lg         = kickoffReturner.xpath('.//td[6]/text()')       .extract_first()
+            td         = kickoffReturner.xpath('.//td[7]/text()')       .extract_first()
+
+            if num != 'Num':
+                if playerName not in self.players.keys():
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
+
+                self.players[playerName].kickReturns   = int(num)
+                self.players[playerName].kickReturnYds = int(yds)
+                self.players[playerName].kickReturnAvg = float(avg)
+                self.players[playerName].kickFC        = int(fc)
+                self.players[playerName].kickLG        = lg
+                self.players[playerName].kickTD        = int(td)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
+                    
+        visitor = True
+        count = 0
         for puntReturner in puntReturnTable.xpath('.//tr'):
             playerName = puntReturner.xpath('.//td[1]/span/a/text()').extract_first()
-        
-        for kicker in kickingTable.xpath('.//tr'):
-            playerName = kicker.xpath('.//td[1]/span/a/text()').extract_first()
+            num        = puntReturner.xpath('.//td[2]/text()')       .extract_first()
+            yds        = puntReturner.xpath('.//td[3]/text()')       .extract_first()
+            avg        = puntReturner.xpath('.//td[4]/text()')       .extract_first()
+            fc         = puntReturner.xpath('.//td[5]/text()')       .extract_first()
+            lg         = puntReturner.xpath('.//td[6]/text()')       .extract_first()
+            td         = puntReturner.xpath('.//td[7]/text()')       .extract_first()
+
+            if num != 'Num':
+                if playerName not in self.players.keys():
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
+
+                self.players[playerName].puntReturns   = int(num)
+                self.players[playerName].puntReturnYds = int(yds)
+                self.players[playerName].puntReturnAvg = float(avg)
+                self.players[playerName].puntFC        = int(fc)
+                self.players[playerName].puntLG        = lg
+                self.players[playerName].puntTD        = int(td)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
+                
+        #for kicker in kickingTable.xpath('.//tr'):
+        #    playerName = kicker.xpath('.//td[1]/span/a/text()').extract_first()
         
         #for defender in defenseTable.xpath('.//tr'):
          #   playerName = defender.xpath('.//td[1]/span/a/text()').extract_first()
-        
+
+        visitor = True
+        count = 0
         for fumbler in fumblesTable.xpath('.//tr'):
             fumblerName = fumbler.xpath('.//td[1]/span/a/text()').extract_first()
+            fum         = fumbler.xpath('.//td[2]/text()')       .extract_first()
+            lost        = fumbler.xpath('.//td[3]/text()')       .extract_first()
+            forced      = fumbler.xpath('.//td[4]/text()')       .extract_first()
+            own         = fumbler.xpath('.//td[5]/text()')       .extract_first()
+            opp         = fumbler.xpath('.//td[6]/text()')       .extract_first()
+            tot         = fumbler.xpath('.//td[7]/text()')       .extract_first()
+            yds         = fumbler.xpath('.//td[8]/text()')       .extract_first()
+            td          = fumbler.xpath('.//td[9]/text()')       .extract_first()
+
+            if fum != 'Fum':
+                if playerName not in self.players.keys():
+                    if visitor:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentHome)
+                    else:
+                        self.players[playerName] = OffensivePlayerGame(playerName, currentVisitor)
+
+                self.players[playerName].fum    = int(fum)
+                self.players[playerName].lost   = int(lost)
+                self.players[playerName].forced = int(forced)
+                self.players[playerName].own    = int(own)
+                self.players[playerName].opp    = int(opp)
+                self.players[playerName].tot    = int(tot)
+                self.players[playerName].yds    = int(yds)
+                self.players[playerName].fumTD  = int(td)
+
+            else:
+                count += 1
+                if count == 2:
+                    visitor = False
         
         visitorFirstDowns        = leftTableBody.xpath('.//tr[1]/td[2]/text()')  .extract_first()
         visitorRushingFirstDowns = leftTableBody.xpath('.//tr[2]/td[2]/text()')  .extract_first()
@@ -259,12 +379,13 @@ class GamesbotSpider(scrapy.Spider):
 
         for key in self.players:
             fileName = getFileFromName(key)
-            print(self.players[key].printOffensivePlayerGame())
             playerFolder = '../NFLPlayerScraper/players/'
             playerFile = open(playerFolder+fileName, 'a')
             if (playerFile):
                writer = csv.writer(playerFile)
-               writer.writerow([self.players[key].passAtt            ,
+               writer.writerow([currentDate                          ,
+                                    self.players[key].opponent       ,
+                                    self.players[key].passAtt        ,
 				    self.players[key].passCmp        ,
 				    self.players[key].passYds        ,
 				    self.players[key].passYPA        ,
@@ -287,15 +408,15 @@ class GamesbotSpider(scrapy.Spider):
 				    self.players[key].recTD          ,
 				    self.players[key].recFirstDowns  ,
 				    self.players[key].YAC            ,
-				    self.players[key].numPuntReturns ,
+				    self.players[key].puntReturns    ,
 				    self.players[key].puntReturnYds  ,
-				    self.players[key].avgPuntReturn  ,
+				    self.players[key].puntReturnAvg  ,
 				    self.players[key].puntFC         ,
-				    self.players[key].puntLg         ,
+				    self.players[key].puntLG         ,
 				    self.players[key].puntTD         ,
 				    self.players[key].kickReturns    ,
 				    self.players[key].kickReturnYds  ,
-				    self.players[key].kickreturnAvg  ,
+				    self.players[key].kickReturnAvg  ,
 				    self.players[key].kickFC         ,
 				    self.players[key].kickLG         ,
 				    self.players[key].kickTD         ,

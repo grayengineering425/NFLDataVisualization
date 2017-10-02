@@ -28,13 +28,14 @@ class PlayerbotSpider(scrapy.Spider):
                 'player_college'  : playerCollege,
             }
             fileName = str(playerName).replace(', ', '_')+'.csv'
-            print(fileName)
-            with open('players/'+fileName, 'w') as player_csv:
-                writer = csv.writer(player_csv)
-                writer.writerow(['date','passAtt','passCmp','passYds','passYPA','passTD','interceptions','passLG',
-                                 'sack','loss','rate','rushAtt','rushYds','rushAvg','rushLg','rushTD','rushFirstDowns',
-                                 'rec','recYds','recAvg','recLg','recTD','recFirstDowns','YAC','numPuntReturns','puntReturnYds',
-                                 'avgPuntReturn','puntFC','puntLg','puntTD','kickReturns','kickReturnYds','kickreturnAvg',
-                                 'kickFC','kickLG','kickTD','fum','lost','forced','own','opp','tot','yds','fumTD'])
+            if fileName != 'None.csv':
+                print(fileName)
+                with open('players/'+fileName, 'w') as player_csv:
+                    writer = csv.writer(player_csv)
+                    writer.writerow(['date', 'opponent', 'passAtt','passCmp','passYds','passYPA','passTD','interceptions','passLG',
+                                     'sack','loss','rate','rushAtt','rushYds','rushAvg','rushLg','rushTD','rushFirstDowns',
+                                     'rec','recYds','recAvg','recLg','recTD','recFirstDowns','YAC','numPuntReturns','puntReturnYds',
+                                     'avgPuntReturn','puntFC','puntLg','puntTD','kickReturns','kickReturnYds','kickreturnAvg',
+                                     'kickFC','kickLG','kickTD','fum','lost','forced','own','opp','tot','yds','fumTD'])
                 
         
