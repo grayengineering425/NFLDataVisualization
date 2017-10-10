@@ -63,10 +63,11 @@ class GamesbotSpider(scrapy.Spider):
         fumblesDiv		 = playerStats     .xpath('.//div[@class = "table-responsive"][10]')
         fumblesTable             = fumblesDiv      .xpath('.//table[@class = "statistics"]')
 
-        currentDate              = response        .xpath('//div[@id = "leftcol"]/center/div/text()').extract_first()
-        currentVisitor           = response        .xpath('//button[@id = "btnBox_visitor"]/text()') .extract_first()
-        currentHome              = response        .xpath('//button[@id = "btnBox_home"]/text()')    .extract_first()
-        
+        currentDate              = response        .xpath('//div[@id = "leftcol"]/center/div/text()')                                .extract_first()
+        currentVisitor           = response        .xpath('//button[@id = "btnBox_visitor"]/text()')                                 .extract_first()
+        currentHome              = response        .xpath('//button[@id = "btnBox_home"]/text()')                                    .extract_first()
+        visitorScore             = response        .xpath('//div[@id = "leftcol"]/table[@class = "statistics"]/tr[2]/td/b/text()')   .extract()[-1]
+        homeScore                = response        .xpath('//div[@id = "leftcol"]/table[@class = "statistics"]/tr[3]/td/b/text()')   .extract()[-1]
 
         visitor = True
         count = 0
@@ -265,7 +266,7 @@ class GamesbotSpider(scrapy.Spider):
                 count += 1
                 if count == 2:
                     visitor = False
-        
+
         visitorFirstDowns        = leftTableBody.xpath('.//tr[1]/td[2]/text()')  .extract_first()
         visitorRushingFirstDowns = leftTableBody.xpath('.//tr[2]/td[2]/text()')  .extract_first()
         visitorPassingFirstDowns = leftTableBody.xpath('.//tr[3]/td[2]/text()')  .extract_first()
@@ -323,6 +324,11 @@ class GamesbotSpider(scrapy.Spider):
         homeTimeOfPossession  	 = rightTableBody.xpath('.//tr[13]/td[3]/text()').extract_first()
 
         teamStats = {
+            'date'                          : currentDate,
+            'visitor'                       : currentVisitor,
+            'home'                          : currentHome,
+            'visitor_score'                 : visitorScore,
+            'home_score'                    : homeScore,
             'visitor_first_downs'           : visitorFirstDowns,
             'visitor_rushing_first_downs'   : visitorRushingFirstDowns,
             'visitor_passing_first_downs'   : visitorPassingFirstDowns,
